@@ -39,19 +39,17 @@
 ## Примечания для запуска проекта:
  - При разработке использовалас **Visual Studio 2022**  с поддержкой **.NET 8.0**.
  - Откройте решение ParallelAnalyzer.sln.
- - 
  - Установите проект ParallelAnalyzer.UI как запускаемый.
  - Нажмите запустить.
 
  ## Структура проекта
  ParallelAnalyzer/
-│
-├── ParallelAnalyzer.Core/         # Логика, модели, база данных EF
-├── ParallelAnalyzer.Benchmark/    # BenchmarkDotNet-тесты
-├── ParallelAnalyzer.UI/           # Интерфейс Eto.Forms
-│
-├── ParallelAnalyzer.sln           # Решение проекта
-└── README.md                      # Описание проекта
+
+1) ParallelAnalyzer.Core -   # Логика, модели, база данных EF
+2) ParallelAnalyzer.Benchmark -   # BenchmarkDotNet-тесты
+3) ParallelAnalyzer.UI -           # Интерфейс Eto.Forms
+4) ParallelAnalyzer.sln -            # Решение проекта
+   README.md -                    # Описание проекта
 
 ## Таблицы базы данных (SQLite)
 
