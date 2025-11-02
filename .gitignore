@@ -1,0 +1,44 @@
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# Build results
+bin/
+obj/
+Debug/
+Release/
+x64/
+x86/
+
+# SQLite DB
+*.db
+*.sqlite
+Data/
+
+# BenchmarkDotNet artifacts
+BenchmarkDotNet.Artifacts/
+BenchmarkDotNet.Results/
+
+# Temporary files
+*.log
+*.tmp
+*.cache
+
+# Rider / JetBrains
+.idea/
+*.iml
+_ReSharper*/
+*.DotSettings.user
+
+# .NET packages
+packages/
+*.nupkg
+
+# Test results
+TestResults/
+*.trx
+
+# Publish / dist output
+publish/
+dist/
