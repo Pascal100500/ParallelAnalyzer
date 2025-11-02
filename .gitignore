@@ -14,7 +14,7 @@ x86/
 # SQLite DB
 *.db
 *.sqlite
-Data/
+Data/*.db
 
 # BenchmarkDotNet artifacts
 BenchmarkDotNet.Artifacts/
