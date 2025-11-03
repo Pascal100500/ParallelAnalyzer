@@ -10,17 +10,18 @@ namespace ParallelAnalyzer.Benchmark.Benchmarks
     [RankColumn]
     public class ArrayReverseBenchmark
     {
-        [ParamsSource(nameof(ArraySizes))]
-        public int N { get; set; }
+        //[ParamsSource(nameof(ArraySizes))]
+        //public int N { get; set; }
 
-        public static IEnumerable<int> ArraySizes => new[] { TaskConfig.ArraySize };
+        //public static IEnumerable<int> ArraySizes => new[] { TaskConfig.ArraySize };
 
         private ArrayReverseTask? task;
 
         [GlobalSetup]
         public void Setup()
         {
-            task = new ArrayReverseTask(N, 1_000_000);
+            int n = TaskConfig.ArraySize;
+            task = new ArrayReverseTask(n, 1_000_000);
             task.Setup();
         }
 

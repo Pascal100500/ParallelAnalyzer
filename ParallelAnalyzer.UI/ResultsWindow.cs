@@ -51,7 +51,7 @@ namespace ParallelAnalyzer.UI
             gridResults.Columns.Add(new GridColumn { HeaderText = "Среднее (мс)", DataCell = new TextBoxCell(nameof(ResultViewModel.MeanMs)), Width = 120 });
             gridResults.Columns.Add(new GridColumn { HeaderText = "Комментарий", DataCell = new TextBoxCell(nameof(ResultViewModel.Comment)), Width = 250 });
 
-            // 🔹 Кнопка удаления
+            // Кнопка удаления
             btnDeleteSession.Click += (s, e) =>
             {
                 if (gridSessions.SelectedItem is not SessionViewModel selected)
@@ -245,10 +245,21 @@ namespace ParallelAnalyzer.UI
                     new ScottPlot.TickGenerators.NumericManual(
                         Enumerable.Range(0, labels.Length).Select(i => (double)i).ToArray(), labels);
 
+                //plot.Plot.Axes.Bottom.TickLabelStyle.Rotation = 75;
+                //plot.Plot.Axes.Margins(bottom: 0.4);
+                //plot.Plot.Title($"Результаты сессии #{session.Id}");
+                //plot.Plot.YLabel("Время (мс)");
+                plot.Plot.Axes.Margins(bottom: 0.7);
                 plot.Plot.Axes.Bottom.TickLabelStyle.Rotation = 75;
-                plot.Plot.Axes.Margins(bottom: 0.4);
-                plot.Plot.Title($"Результаты сессии #{session.Id}");
-                plot.Plot.YLabel("Время (мс)");
+                //plot.Plot.Axes.Bottom.TickLabelStyle.Alignment = ScottPlot.Alignment.LowerLeft;
+                plot.Plot.Axes.Bottom.TickLabelStyle.Alignment = ScottPlot.Alignment.UpperRight;
+                                
+                plot.Plot.Axes.Bottom.TickLabelStyle.OffsetY = -10;
+
+                // Дополнительный отступ снизу для длинных надписей
+                plot.Plot.Axes.Margins(bottom: 0.6);
+                plot.Plot.Axes.AutoScale();
+                plot.Plot.RenderInMemory(); 
                 plot.Refresh();
             }
         }

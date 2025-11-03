@@ -15,6 +15,7 @@ using EFontFamilies = Eto.Drawing.FontFamilies;
 using ESize = Eto.Drawing.Size;
 using EColors = Eto.Drawing.Colors;
 using EColor = Eto.Drawing.Color;
+using ScottPlot;
 
 
 
@@ -53,6 +54,14 @@ namespace ParallelAnalyzer.UI
                 Items = { "1 000 000", "5 000 000", "10 000 000", "20 000 000" },
                 SelectedIndex = 0,
                 Enabled = false 
+            };
+            cbArraySize.SelectedIndexChanged += (s, e) =>
+            {
+                if (cbArraySize.SelectedValue != null &&
+                    int.TryParse(cbArraySize.SelectedValue.ToString().Replace(" ", ""), out int parsed))
+                {
+                    TaskConfig.ArraySize = parsed; 
+                }
             };
 
             cbCategory.SelectedIndexChanged += (s, e) =>
@@ -176,7 +185,7 @@ namespace ParallelAnalyzer.UI
         {
             Orientation = EOrientation.Horizontal,
             Spacing = 5,
-            Items = { new Label { Text = "Размер массива N:" }, cbArraySize }
+            Items = { new ELabel { Text = "Размер массива N:" }, cbArraySize }
         },
         new StackLayout
         {
@@ -263,6 +272,7 @@ namespace ParallelAnalyzer.UI
                 try
                 {
                     progressWindow.UpdateStatus("Выполняется BenchmarkDotNet...");
+                    Environment.SetEnvironmentVariable("BENCHMARK_ARRAY_SIZE", TaskConfig.ArraySize.ToString());
 
                     var summary = BenchmarkDotNet.Running.BenchmarkRunner.Run(benchmarkType);
 
@@ -381,6 +391,8 @@ namespace ParallelAnalyzer.UI
             double[] values = data.Select(d => d.MeanMs).ToArray();
             string[] labels = data.Select(d => d.Method).ToArray();
 
+            plot.Plot.Clear();
+
             var bars = plot.Plot.Add.Bars(values);
             plot.Plot.Axes.Bottom.TickGenerator = new ScottPlot.TickGenerators.NumericManual(
                 Enumerable.Range(0, labels.Length).Select(i => (double)i).ToArray(), labels);
@@ -388,9 +400,15 @@ namespace ParallelAnalyzer.UI
             // Настройки внешнего вида
             plot.Plot.Axes.Bottom.TickLabelStyle.Rotation = 75;
             plot.Plot.Axes.Bottom.TickLabelStyle.Alignment = ScottPlot.Alignment.LowerLeft;
-            plot.Plot.Axes.Margins(bottom: 0.5);
-
-            // Пересчитать оси и применить стиль
+           // plot.Plot.Axes.Bottom.TickLabelStyle.Alignment = ScottPlot.Alignment.UpperRight;
+                       
+            plot.Plot.Axes.Bottom.TickLabelStyle.OffsetY = -25;
+            plot.Plot.Axes.Bottom.TickLabelStyle.OffsetX = -5;
+            plot.Plot.Axes.Bottom.TickLabelStyle.FontSize = 9;
+            
+            plot.Plot.Axes.Margins(bottom: 1.5);
+            
+                       
             plot.Plot.Axes.AutoScale();
             plot.Plot.RenderInMemory();
             plot.Refresh();
@@ -442,18 +460,63 @@ namespace ParallelAnalyzer.UI
                 // Проверяем наличие Task
                 bool isNumericTask = (cbCategory.SelectedValue?.ToString() ?? "").Contains("числов");
 
+
                 var task = db.Tasks.FirstOrDefault(t => t.TaskName == selectedTaskName);
-                if (task == null)
+                int selectedArraySize = TaskConfig.ArraySize;
+
+                // если задача уже есть — обновляем InputSize
+                if (task != null)
+                {
+                    if (isNumericTask)
+                    {
+                        task.InputSize = selectedArraySize;
+                        db.SaveChanges();
+                    }
+                }
+                else
                 {
                     task = new ParallelAnalyzer.Core.Models.BenchmarkTask
                     {
                         TaskName = selectedTaskName,
                         Description = $"Анализ задачи: {selectedTaskName}",
-                        InputSize = isNumericTask ? TaskConfig.ArraySize : 0
+                        InputSize = isNumericTask ? selectedArraySize : 0
                     };
                     db.Tasks.Add(task);
                     db.SaveChanges();
                 }
+
+                /*
+                var task = db.Tasks.FirstOrDefault(t => t.TaskName == selectedTaskName);
+                if (task == null)
+                {
+                    int selectedArraySize = 1_000_000;
+
+                    if (isNumericTask)
+                    {
+                        // Читаем выбранный пользователем размер массива из ComboBox
+                        if (cbArraySize.SelectedValue != null &&
+                            int.TryParse(cbArraySize.SelectedValue.ToString().Replace(" ", ""), out int parsed))
+                            selectedArraySize = parsed;
+                        else
+                            selectedArraySize = TaskConfig.ArraySize;
+                    }
+
+                    task = new ParallelAnalyzer.Core.Models.BenchmarkTask
+                    {
+                        TaskName = selectedTaskName,
+                        Description = $"Анализ задачи: {selectedTaskName}",
+                        InputSize = isNumericTask ? selectedArraySize : 0
+                    };
+                    //task = new ParallelAnalyzer.Core.Models.BenchmarkTask
+                    //{
+                    //    TaskName = selectedTaskName,
+                    //    Description = $"Анализ задачи: {selectedTaskName}",
+                    //    InputSize = isNumericTask ? TaskConfig.ArraySize : 0
+                    //};
+                    db.Tasks.Add(task);
+                    db.SaveChanges();
+                }
+                */
 
                 // Создаём новую сессию
                 var session = new ParallelAnalyzer.Core.Models.BenchmarkSession
@@ -477,7 +540,8 @@ namespace ParallelAnalyzer.UI
                         MethodName = r.Method,
                         MeanMs = r.MeanMs,
                         StdDevMs = 0,
-                        N = r.N,
+                        N = TaskConfig.ArraySize,
+                        //N = r.N,
                         Comment = $"- (N={r.N:N0})"
                     });
                 }
